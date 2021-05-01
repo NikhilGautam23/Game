@@ -1,0 +1,140 @@
+<html>
+
+<head>
+    <title> Snake Game </title>
+</head>
+<style type="text/css">
+    body {
+        background: url("background.jpg");
+        background-repeat: no-repeat;
+        background-size: 110% 100%;
+    }
+
+    #game {
+        background-color: black;
+    }
+</style>
+
+<body>
+    <span
+        style="color: azure; font-size: 60px; font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;">
+     Snake Game
+    </span>
+    &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+    &emsp;&emsp;&emsp;&emsp;&emsp;
+    <b id="score" style="font-size: 200%; font-family:cursive; color: cornsilk;"> Your Score : 0</b><br>
+    <hr />
+    <canvas id="game" width="800" height="600"></canvas>
+</body>
+<script>
+    var canvas = document.getElementById("game");
+    canvas.style.border = "2px solid  grey";
+    var ctx = canvas.getContext("2d");
+    var Snake = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }];
+    var score = 0;
+    var food = {
+        x: Math.round(Math.random() * (39 - 0) + 0) * 20,
+        y: Math.round(Math.random() * (29 - 0) + 0) * 20
+    };
+    var x = 39;
+    var flag = true;
+    var terminate = false, pause = false;
+    document.body.addEventListener("keydown", direction);
+    window.setInterval(function () { drawSnake() }, 80);
+    createfood();
+    drawfood();
+    function move(e) {
+        switch (e) {
+            case 37: var t = 0;
+                if (Snake[Snake.length - 1].x == 0)
+                    t = 40;
+                Snake.push({ x: (Snake[Snake.length - 1].x - 1 + t) % 40, y: Snake[Snake.length - 1].y });
+                break;
+            case 38: var t = 0;
+                if (Snake[Snake.length - 1].y == 0)
+                    t = 30;
+                Snake.push({ x: Snake[Snake.length - 1].x, y: (Snake[Snake.length - 1].y - 1 + t) % 30 });
+                break;
+            case 39: Snake.push({ x: (Snake[Snake.length - 1].x + 1) % 40, y: Snake[Snake.length - 1].y });
+                break;
+            case 40: Snake.push({ x: (Snake[Snake.length - 1].x), y: (Snake[Snake.length - 1].y + 1) % 30 });
+                break;
+        }
+    }
+    function direction(event) {
+        if (event.keyCode == 32) {
+            pause = !pause;
+            flag = !flag;
+        }
+        if (flag && (event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40)) {
+            if ((x == 37 && event.keyCode == 39) || (x == 39 && event.keyCode == 37))
+                return;
+            else if ((x == 38 && event.keyCode == 40) || (x == 40 && event.keyCode == 38))
+                return;
+            else if (x != event.keyCode) {
+                x = event.keyCode;
+                flag = false;
+            }
+        }
+
+    }
+    function drawSnake() {
+        if ((!terminate) && (!pause) && Snake.length < 1200) {
+            var t = true;
+            move(x);
+            if (Snake[Snake.length - 1].x * 20 == food.x && Snake[Snake.length - 1].y * 20 == food.y)            //eaten food
+            {
+                score += 10;
+                document.getElementById("score").innerHTML = "Score : " + score;
+                t = false;
+                createfood();
+                drawfood();
+            }
+            ctx.clearRect(Snake[0].x * 20, Snake[0].y * 20, 20, 20);                                       //clear tail in canvas
+            if (t) {
+                Snake.shift();                                                                    //erase
+            }
+            for (i = 0; i < Snake.length; i++) {
+                ctx.strokeStyle = "#000000";
+                ctx.strokeRect(Snake[i].x * 20, Snake[i].y * 20, 20, 20);
+                ctx.fillStyle = "#D7D6D6";
+                ctx.fillRect(Snake[i].x * 20 + 1, Snake[i].y * 20 + 1, 18, 18);
+            }
+            bite();                                                                               //out
+            flag = true;
+        }
+    }
+    function bite() {
+        var a = Snake[Snake.length - 1].x;
+        var b = Snake[Snake.length - 1].y;
+        for (var i = 0; i < Snake.length - 1; i++) {
+            if (a == Snake[i].x && b == Snake[i].y) {
+                terminate = true;
+                ctx.fillStyle = "red";
+                ctx.fillRect(Snake[i].x * 20 + 1, Snake[i].y * 20 + 1, 18, 18);
+                ctx.fillStyle = "WHITE";
+                ctx.font = "45px CURSIVE";
+                ctx.fillText("GAME OVER", 280, 310);
+            }
+        }
+    }
+    function createfood() {
+        food.x = Math.round(Math.random() * (39 - 0) + 0) * 20;
+        food.y = Math.round(Math.random() * (29 - 0) + 0) * 20;
+        for (var i = 0; i < Snake.length; i++) {
+            if (food.x == Snake[i].x * 20 && food.y == Snake[i].y * 20) {
+                createfood();
+                return;
+            }
+        }
+    }
+    function drawfood() {
+        ctx.strokeStyle = "black";
+        ctx.strokeRect(food.x, food.y, 20, 20);
+        ctx.fillStyle = "#3CB371";
+        ctx.fillRect(food.x + 2, food.y + 2, 18, 18);
+    }
+
+</script>
+
+</html>
